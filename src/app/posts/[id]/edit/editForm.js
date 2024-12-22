@@ -1,8 +1,8 @@
-// app/posts/[id]/edit/EditForm.js
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 export default function EditForm({ postId }) {
   const router = useRouter();
@@ -12,12 +12,11 @@ export default function EditForm({ postId }) {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await fetch(`/api/posts/${postId}`);
-        if (!response.ok) throw new Error('Failed to fetch post');
-        const data = await response.json();
+        const { data } = await axios.get(`/api/posts/${postId}`);
         setTitle(data.title);
         setContent(data.content);
       } catch (error) {
+        console.error('Error fetching post:', error);
         alert('게시글을 불러올 수 없습니다.');
         router.push('/posts');
       }
@@ -30,18 +29,10 @@ export default function EditForm({ postId }) {
     e.preventDefault();
 
     try {
-      const response = await fetch(`/api/posts/${postId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title, content }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update post');
-      
+      await axios.put(`/api/posts/${postId}`, { title, content });
       router.push('/posts');
     } catch (error) {
+      console.error('Error updating post:', error);
       alert('수정에 실패했습니다.');
     }
   };

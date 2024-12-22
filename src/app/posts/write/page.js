@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 export default function WritePage() {
   const router = useRouter();
@@ -10,18 +11,17 @@ export default function WritePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch('/api/posts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title, content }),
-    });
+    try {
+      const response = await axios.post('/api/posts', { title, content });
 
-    if (response.ok) {
-      router.push('/posts');
-    } else {
-      alert('글 작성에 실패했습니다.');
+      if (response.status === 201) { // HTTP 201 Created
+        router.push('/posts');
+      } else {
+        alert('글 작성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('오류가 발생했습니다.');
     }
   };
 

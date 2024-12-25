@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/utils/mongodb';
 import Post from '@/models/Post';
 import mongoose from 'mongoose';
+import connectDB from '@/lib/mongodb';
 
 // 게시글 ID 유효성 검사 함수
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
@@ -9,16 +9,21 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 // GET /api/posts/[id] - 특정 게시글 조회
 export async function GET(req, { params }) {
   try {
+    // mongoDB 연결
     await connectDB();
 
-    if (!isValidObjectId(params.id)) {
+    // params를 비동기로 처리
+    const resolvedParams = await Promise.resolve(params);
+    // const id = resolvedParams.id;
+
+    if (!isValidObjectId(resolvedParams.id)) {
       return NextResponse.json(
         { error: '유효하지 않은 게시글 ID입니다.' },
         { status: 400 }
       );
     }
 
-    const post = await Post.findById(params.id);
+    const post = await Post.findById(resolvedParams.id);
     if (!post) {
       return NextResponse.json(
         { error: '게시글을 찾을 수 없습니다.' },
@@ -39,8 +44,9 @@ export async function GET(req, { params }) {
 export async function PUT(req, { params }) {
   try {
     await connectDB();
+    const resolvedParams = await Promise.resolve(params);
 
-    if (!isValidObjectId(params.id)) {
+    if (!isValidObjectId(resolvedParams.id)) {
       return NextResponse.json(
         { error: '유효하지 않은 게시글 ID입니다.' },
         { status: 400 }
@@ -49,7 +55,7 @@ export async function PUT(req, { params }) {
 
     const data = await req.json();
     const post = await Post.findByIdAndUpdate(
-      params.id,
+      resolvedParams.id,
       { $set: data },
       { new: true, runValidators: true }
     );
@@ -74,15 +80,16 @@ export async function PUT(req, { params }) {
 export async function DELETE(req, { params }) {
   try {
     await connectDB();
+    const resolvedParams = await Promise.resolve(params);
 
-    if (!isValidObjectId(params.id)) {
+    if (!isValidObjectId(resolvedParams.id)) {
       return NextResponse.json(
         { error: '유효하지 않은 게시글 ID입니다.' },
         { status: 400 }
       );
     }
 
-    const post = await Post.findByIdAndDelete(params.id);
+    const post = await Post.findByIdAndDelete(resolvedParams.id);
     if (!post) {
       return NextResponse.json(
         { error: '게시글을 찾을 수 없습니다.' },

@@ -62,7 +62,7 @@ export default function PostDetailPage({ params }) {
       </div>
       <div>
         <Link href="/posts">목록</Link>
-        <Link href={`/posts/${post.id}/edit`}>수정</Link>
+        <Link href={`/posts/${post._id}/edit`}>수정</Link>
         <button onClick={handleDelete}>삭제</button>
       </div>
     </div>

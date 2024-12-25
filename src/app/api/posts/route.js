@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import posts from '@/data/posts';
 import connectDB from '@/lib/mongodb';
 import Post from '@/models/Post';
 

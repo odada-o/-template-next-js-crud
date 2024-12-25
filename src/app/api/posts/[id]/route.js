@@ -1,20 +1,31 @@
 import { NextResponse } from 'next/server';
-import posts from '@/data/posts';
+import connectDB from '@/utils/mongodb';
+import Post from '@/models/Post';
+import mongoose from 'mongoose';
 
-// 특정 게시글 조회
-export async function GET(request, { params }) {
+// 게시글 ID 유효성 검사 함수
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// GET /api/posts/[id] - 특정 게시글 조회
+export async function GET(req, { params }) {
   try {
-    // URL 파라미터로 전달된 id 값과 일치하는 게시글 찾기
-    const post = posts.find(p => p.id === parseInt(params.id));
-    
-    // 게시글이 없을 경우 404 응답
+    await connectDB();
+
+    if (!isValidObjectId(params.id)) {
+      return NextResponse.json(
+        { error: '유효하지 않은 게시글 ID입니다.' },
+        { status: 400 }
+      );
+    }
+
+    const post = await Post.findById(params.id);
     if (!post) {
       return NextResponse.json(
         { error: '게시글을 찾을 수 없습니다.' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(post);
   } catch (error) {
     return NextResponse.json(
@@ -24,31 +35,33 @@ export async function GET(request, { params }) {
   }
 }
 
-// 게시글 수정
+// PUT /api/posts/[id] - 게시글 수정
 export async function PUT(req, { params }) {
   try {
-    // 요청 데이터를 JSON으로 파싱
+    await connectDB();
+
+    if (!isValidObjectId(params.id)) {
+      return NextResponse.json(
+        { error: '유효하지 않은 게시글 ID입니다.' },
+        { status: 400 }
+      );
+    }
+
     const data = await req.json();
-    // URL 파라미터로 전달된 id 값과 일치하는 게시글의 인덱스 찾기
-    const index = posts.findIndex(p => p.id === parseInt(params.id));
-    
-    // index가 -1이면 게시글이 없다는 의미
-    if (index === -1) {
+    const post = await Post.findByIdAndUpdate(
+      params.id,
+      { $set: data },
+      { new: true, runValidators: true }
+    );
+
+    if (!post) {
       return NextResponse.json(
         { error: '게시글을 찾을 수 없습니다.' },
         { status: 404 }
       );
     }
 
-    // posts 배열의 index 위치에 있는 게시글 수정
-    posts[index] = {
-      ...posts[index], // 기존 게시글 정보
-      title: data.title || posts[index].title, // or 연산자로 값이 없을 경우 기존 값 유지
-      content: data.content || posts[index].content // or 연산자로 값이 없을 경우 기존 값 유지
-    };
-    
-    // 수정된 게시글 응답
-    return NextResponse.json(posts[index]);
+    return NextResponse.json(post);
   } catch (error) {
     return NextResponse.json(
       { error: '게시글 수정에 실패했습니다.' },
@@ -57,21 +70,26 @@ export async function PUT(req, { params }) {
   }
 }
 
-// 게시글 삭제
+// DELETE /api/posts/[id] - 게시글 삭제
 export async function DELETE(req, { params }) {
   try {
-    const index = posts.findIndex(p => p.id === parseInt(params.id));
-    
-    if (index === -1) {
+    await connectDB();
+
+    if (!isValidObjectId(params.id)) {
+      return NextResponse.json(
+        { error: '유효하지 않은 게시글 ID입니다.' },
+        { status: 400 }
+      );
+    }
+
+    const post = await Post.findByIdAndDelete(params.id);
+    if (!post) {
       return NextResponse.json(
         { error: '게시글을 찾을 수 없습니다.' },
         { status: 404 }
       );
     }
-    
-    // index 위치에 있는 게시글 삭제
-    posts.splice(index, 1);
-    // 삭제 성공 메시지 응답
+
     return NextResponse.json({ message: '게시글이 삭제되었습니다.' });
   } catch (error) {
     return NextResponse.json(

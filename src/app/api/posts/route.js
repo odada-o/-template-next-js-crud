@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import posts from '@/data/posts';
+import connectDB from '@/lib/mongodb';
+import Post from '@/models/Post';
 
 // 전체 게시글 조회
 export async function GET() {
   try {
+    await connectDB();
+    const posts = await Post.find({}).sort({ createdAt: -1 });
     // 게시글 목록을 JSON 형식으로 응답
     return NextResponse.json(posts);
   } catch (error) {
@@ -17,6 +21,7 @@ export async function GET() {
 // 새 게시글 작성
 export async function POST(req) {
   try {
+    await connectDB();
     // 요청 데이터를 JSON으로 파싱
     const data = await req.json();
 
@@ -29,15 +34,8 @@ export async function POST(req) {
     }
 
     // 새 게시글 생성
-    const newPost = {
-      id: posts.length + 1,
-      title: data.title,
-      content: data.content,
-      createdAt: new Date().toLocaleDateString()
-    };
-    
-    posts.push(newPost);
-    return NextResponse.json(newPost, { status: 201 });
+    const post = await Post.create(data);
+    return NextResponse.json(post, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { error: '게시글 작성에 실패했습니다.' },

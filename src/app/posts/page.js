@@ -52,18 +52,18 @@ export default function PostsPage() {
       <div>
         {posts.map((post) => (
           <div
-            key={post.id}
-            onClick={() => handlePostClick(post.id)}
+            key={post._id}  // id 대신 _id 사용
+            onClick={() => handlePostClick(post._id)}
             className="cursor-pointer"
           >
             <h2>{post.title}</h2>
             <p>{post.content}</p>
-            <span>{post.createdAt}</span>
+            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
             <div>
-              <Link href={`/posts/${post.id}/edit`}>수정</Link>
+              <Link href={`/posts/${post._id}/edit`}>수정</Link>
               <button onClick={(e) => {
-                e.stopPropagation(); // 부모 클릭 이벤트 방지
-                handleDelete(post.id);
+                e.stopPropagation();
+                handleDelete(post._id);
               }}>
                 삭제
               </button>

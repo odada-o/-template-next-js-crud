@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { formatDate } from '@/utils/formatDate';
 
 export default function PostsPage() {
   const router = useRouter();
@@ -53,7 +54,7 @@ export default function PostsPage() {
             >
             <h2>{post.title}</h2>
             <p>{post.content}</p>
-            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+            <span>{formatDate(post.createdAt)}</span>
           </Link>
         ))}
       </div>

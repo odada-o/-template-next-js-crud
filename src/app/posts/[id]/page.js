@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
+import { formatDate } from '@/utils/formatDate';
 
 export default function PostDetailPage({ params }) {
   const router = useRouter();
@@ -56,7 +57,7 @@ export default function PostDetailPage({ params }) {
   return (
     <div>
       <h1>{post.title}</h1>
-      <p>작성일: {post.createdAt}</p>
+      <p>작성일: {formatDate(post.createdAt)}</p>
       <div>
         <p>{post.content}</p>
       </div>

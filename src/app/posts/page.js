@@ -37,11 +37,6 @@ export default function PostsPage() {
     }
   };
 
-  // 상세 페이지로 이동하는 함수
-  const handlePostClick = (id) => {
-    router.push(`/posts/${id}`);
-  };
-
   if (loading) return <div>로딩 중...</div>;
 
   return (
@@ -51,24 +46,15 @@ export default function PostsPage() {
 
       <div>
         {posts.map((post) => (
-          <div
-            key={post._id}  // id 대신 _id 사용
-            onClick={() => handlePostClick(post._id)}
-            className="cursor-pointer"
-          >
+          <Link
+              key={post._id}
+              href={`/posts/${post._id}`}
+              className="cursor-pointer block"  // block 추가하여 전체 영역 클릭 가능하게
+            >
             <h2>{post.title}</h2>
             <p>{post.content}</p>
             <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-            <div>
-              <Link href={`/posts/${post._id}/edit`}>수정</Link>
-              <button onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(post._id);
-              }}>
-                삭제
-              </button>
-            </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
